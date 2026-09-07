@@ -32,27 +32,6 @@ jobs:
       - name: 补全并初始化 Android 平台支撑脚手架
         run: flutter create --platforms=android --org com.antigravity .
 
-      - name: 配置 Gradle 统一 compileSdk 36 并豁免 AAR 检查
-        run: |
-          mkdir -p ~/.gradle/init.d
-          cat << 'EOF' > ~/.gradle/init.d/force-compile-sdk.gradle
-          allprojects {
-              afterEvaluate { project ->
-                  if (project.plugins.hasPlugin("com.android.application") || project.plugins.hasPlugin("com.android.library")) {
-                      project.android {
-                          compileSdk = 36
-                          try {
-                              compileSdkVersion 36
-                          } catch (Exception ignored) {}
-                      }
-                  }
-              }
-              tasks.matching { it.name.contains("AarMetadata") }.configureEach {
-                  enabled = false
-              }
-          }
-          EOF
-
       - name: 获取项目依赖包
         run: flutter pub get
 

@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -28,29 +27,6 @@ class ImagePreviewBox extends StatelessWidget {
                 name: name,
                 path: picked.path,
                 mimeType: mime,
-              );
-        }
-      }
-    } catch (_) {
-      // Fallback to FilePicker if image_picker encounters platform issues
-      _pickWithFilePicker(context);
-    }
-  }
-
-  Future<void> _pickWithFilePicker(BuildContext context) async {
-    try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType.image,
-        withData: true,
-      );
-      if (result != null && result.files.isNotEmpty) {
-        final file = result.files.first;
-        if (file.bytes != null && context.mounted) {
-          context.read<InspectorProvider>().setImage(
-                bytes: file.bytes!,
-                name: file.name,
-                path: file.path,
-                mimeType: 'image/${file.extension ?? "jpeg"}',
               );
         }
       }
@@ -121,7 +97,7 @@ class ImagePreviewBox extends StatelessWidget {
                   subtitle: const Text('适用于电脑端或云端盘选取'),
                   onTap: () {
                     Navigator.pop(ctx);
-                    _pickWithFilePicker(context);
+                    _pickImage(context, ImageSource.gallery);
                   },
                 ),
               ],
