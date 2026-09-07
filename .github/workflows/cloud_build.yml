@@ -1,0 +1,109 @@
+name: Cloud Build & Release (云端自动打包)
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch: # 支持在 GitHub 网页上手动点击运行
+
+permissions:
+  contents: write
+
+jobs:
+  # 1. 云端打包 Android 安装包 (APK)
+  build-apk:
+    name: 构建 Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 配置 Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: 配置 Flutter 环境
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: 补全并初始化 Android 平台支撑脚手架
+        run: flutter create --platforms=android --org com.antigravity .
+
+      - name: 获取项目依赖包
+        run: flutter pub get
+
+      - name: 编译 Release 版 APK
+        run: flutter build apk --release
+
+      - name: 上传构建产物 (可直接在 GitHub Actions 页面下载 APK)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Android-APK-Release
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+
+  # 2. 云端打包 Web 网页版
+  build-web:
+    name: 构建 Web 网页端
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 配置 Flutter 环境
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: 补全并初始化 Web 平台支撑脚手架
+        run: flutter create --platforms=web .
+
+      - name: 获取项目依赖包
+        run: flutter pub get
+
+      - name: 编译 Web 静态资源
+        run: flutter build web --release
+
+      - name: 上传 Web 产物压缩包
+        uses: actions/upload-artifact@v4
+        with:
+          name: Web-HTML5-Release
+          path: build/web
+          retention-days: 30
+
+  # 3. 云端打包 Windows 桌面可执行文件
+  build-windows:
+    name: 构建 Windows 桌面版
+    runs-on: windows-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 配置 Flutter 环境
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: 补全并初始化 Windows 平台支撑脚手架
+        run: flutter create --platforms=windows .
+
+      - name: 获取项目依赖包
+        run: flutter pub get
+
+      - name: 编译 Windows Release
+        run: flutter build windows --release
+
+      - name: 压缩 Windows 产物
+        run: Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath windows-release.zip
+
+      - name: 上传 Windows 桌面端产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-Desktop-Release
+          path: windows-release.zip
+          retention-days: 30
