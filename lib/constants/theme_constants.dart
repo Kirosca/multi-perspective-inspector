@@ -40,15 +40,14 @@ class AppTheme {
         seedColor: AppColors.primary,
         brightness: Brightness.light,
         surface: AppColors.surface,
-        background: AppColors.background,
       ),
       fontFamily: 'PingFang SC',
-      cardTheme: CardTheme(
+      cardTheme: const CardThemeData(
         color: AppColors.surface,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: AppColors.cardBorder, width: 1),
+          borderRadius: BorderRadius.all(Radius.circular(16)),
+          side: BorderSide(color: AppColors.cardBorder, width: 1),
         ),
         margin: EdgeInsets.zero,
       ),
